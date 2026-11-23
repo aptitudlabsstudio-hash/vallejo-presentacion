@@ -1,3 +1,3 @@
 # Los heraldos negros
 
-Presentación interactiva sobre César Vallejo. Abre index.html en el navegador. Usa las flechas para navegar y N para consultar las notas.
+Presentación sobre César Vallejo con escenas originales modeladas en 3D. Abre index.html, usa las flechas para navegar y N para leer las notas.

@@ -3,12 +3,42 @@ const stage = byId('stage');
 const slide = byId('slide');
 const panel = byId('panel');
 const lowerMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
-const scene = createScene(byId('scene'), lowerMotion);
+const gallery = byId('gallery');
+const plates = ['book','mountain','mountain','book','book','water','water','crack','ember','water','mountain','book'];
+let previousPlate;
+function changePlate(index, direction) {
+  const image = document.createElement('img');
+  const src = './assets/art/'+plates[index]+'.webp';
+  image.src = src;
+  image.alt = '';
+  gallery.replaceChildren(...(previousPlate ? [previousPlate] : []),image);
+  const old = previousPlate;
+  previousPlate = image;
+  stage.dataset.plate = plates[index];
+  stage.dataset.page = index;
+  const duration = lowerMotion.matches ? 0 : 900;
+  image.animate([{opacity:0,transform:'scale(1.14) translateX('+direction*3+'%)'},{opacity:1,transform:'scale(1.02)'}],{duration,easing:'cubic-bezier(.2,.7,.2,1)'});
+  if(old) setTimeout(()=>old.remove(),duration);
+  const next = new Image();
+  next.src = './assets/art/'+plates[(index+1)%plates.length]+'.webp';
+}
 let current = 0;
 let touchStart;
 function render(index, direction = 1) {
   current = Math.max(0, Math.min(slides.length - 1, index));
-  const {tag,title,body,art} = slides[current];
+  const {tag,title,body} = slides[current];
+  const outgoing = slide.querySelector('article');
+  if (outgoing && !lowerMotion.matches) {
+    const ghost = outgoing.cloneNode(true);
+    ghost.classList.add('outgoing');
+    ghost.inert = true;
+    ghost.setAttribute('aria-hidden','true');
+    stage.append(ghost);
+    const box = outgoing.getBoundingClientRect();
+    Object.assign(ghost.style,{left:box.left+'px',top:box.top+'px',width:box.width+'px'});
+    const turn = ghost.animate([{opacity:.9,transform:'perspective(800px) rotateY(0deg)'},{opacity:0,transform:'perspective(800px) rotateY('+(-direction*45)+'deg) translateX('+(-direction*65)+'px)'}],{duration:300,easing:'ease-in'});
+    turn.onfinish = () => ghost.remove();
+  }
   slide.innerHTML = '<article><div class="tag">'+tag+'</div><h1>'+title+'</h1>'+body+'</article>';
   if (!lowerMotion.matches) {
     const article = slide.firstElementChild;
@@ -21,13 +51,18 @@ function render(index, direction = 1) {
         {duration:550,delay:i*100,fill:'backwards',easing:'ease-out'});
     });
   }
-  scene.set(art);
+  changePlate(current,direction);
   byId('position').textContent = String(current+1).padStart(2,'0')+' / '+slides.length;
   byId('progress').style.width = ((current+1)/slides.length*100)+'%';
   byId('prev').disabled = current===0;
   byId('next').disabled = current===slides.length-1;
   history.replaceState(null,'','#'+(current+1));
 }
+stage.addEventListener('pointermove', e => {
+  if (e.pointerType!=='mouse'||lowerMotion.matches) return;
+  gallery.style.setProperty('--px',((e.clientX/innerWidth-.5)*10)+'px');
+  gallery.style.setProperty('--py',((e.clientY/innerHeight-.5)*7)+'px');
+});
 function move(delta) {
   if (slides[current+delta]) render(current+delta,delta);
 }
@@ -70,6 +105,27 @@ document.addEventListener('fullscreenchange', () => {
 byId('next').onclick = () => move(1);
 byId('prev').onclick = () => move(-1);
 byId('notes').onclick = () => showPanel('notes');
+byId('glossary').onclick = () => {
+  byId('panelTitle').textContent = 'Palabras del poema';
+  const list = document.createElement('dl');
+  list.className = 'definitions';
+  for (const [term,definition] of [
+    ['Heraldo','Mensajero. En el poema, los golpes parecen anunciar la Muerte.'],
+    ['Resaca','Movimiento del agua al retirarse el oleaje. La imagen sugiere que un golpe trae sufrimientos anteriores.'],
+    ['Empozarse','Acumularse como el agua en un charco.'],
+    ['Zanja','Surco profundo en la tierra. En un rostro sugiere una marca duradera.'],
+    ['Atilas','Alusión a Atila, jefe de los hunos. Evoca una fuerza que arrasa.'],
+    ['Blasfemar','Ofender con palabras aquello que se considera sagrado.'],
+    ['Crepitaciones','Chasquidos que se oyen cuando algo arde.'],
+    ['Voz poética','Quien habla dentro del poema.'],
+    ['Personificación','Atribuir acciones humanas a otra cosa, como cuando la Muerte envía mensajeros.']
+  ]) {
+    const dt=document.createElement('dt'), dd=document.createElement('dd');
+    dt.textContent=term; dd.textContent=definition; list.append(dt,dd);
+  }
+  byId('panelContent').replaceChildren(list);
+  panel.showModal();
+};
 byId('index').onclick = () => showPanel('index');
 byId('full').onclick = fullscreen;
 byId('close').onclick = () => panel.close();
@@ -95,4 +151,5 @@ stage.addEventListener('touchend', event => {
   if (Math.abs(dx)>55 && Math.abs(dx)>Math.abs(dy)*1.5) move(dx<0?1:-1);
 },{passive:true});
 stage.addEventListener('touchcancel', () => {touchStart = undefined;});
-render(Number(location.hash.slice(1))-1 || 0);
+const requested = Number(location.hash.slice(1));
+render(Number.isInteger(requested) ? requested-1 : 0);
