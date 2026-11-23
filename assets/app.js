@@ -4,21 +4,27 @@ const slide = byId('slide');
 const panel = byId('panel');
 const lowerMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 const gallery = byId('gallery');
-const plates = ['book','mountain','mountain','book','book','water','water','crack','ember','water','mountain','book'];
-let previousPlate;
+const plates = ['book','book','mountain','book','book','water','water','crack','ember','water','book','book'];
+let plate = document.createElement('img');
+plate.alt = '';
+gallery.append(plate);
 function changePlate(index, direction) {
-  const image = document.createElement('img');
-  const src = './assets/art/'+plates[index]+'.webp';
-  image.src = src;
-  image.alt = '';
-  gallery.replaceChildren(...(previousPlate ? [previousPlate] : []),image);
-  const old = previousPlate;
-  previousPlate = image;
+  const before = plate.getBoundingClientRect();
+  const url = './assets/art/'+plates[index]+'.webp';
   stage.dataset.plate = plates[index];
   stage.dataset.page = index;
-  const duration = lowerMotion.matches ? 0 : 900;
-  image.animate([{opacity:0,transform:'scale(1.14) translateX('+direction*3+'%)'},{opacity:1,transform:'scale(1.02)'}],{duration,easing:'cubic-bezier(.2,.7,.2,1)'});
-  if(old) setTimeout(()=>old.remove(),duration);
+  const after = plate.getBoundingClientRect();
+  const changed = plate.getAttribute('src') !== url;
+  if (changed) plate.src = url;
+  plate.getAnimations().forEach(animation => animation.cancel());
+  if (!lowerMotion.matches && after.width) {
+    const dx = before.width ? before.left-after.left : direction*90;
+    const dy = before.width ? before.top-after.top : 0;
+    plate.animate([
+      {transform:'translate('+dx+'px,'+dy+'px) scale('+(before.width/after.width||.9)+') rotateZ('+direction*6+'deg)',opacity:changed?.35:1},
+      {transform:'none',opacity:1}
+    ],{duration:820,easing:'cubic-bezier(.19,1,.22,1)'});
+  }
   const next = new Image();
   next.src = './assets/art/'+plates[(index+1)%plates.length]+'.webp';
 }
@@ -27,18 +33,6 @@ let touchStart;
 function render(index, direction = 1) {
   current = Math.max(0, Math.min(slides.length - 1, index));
   const {tag,title,body} = slides[current];
-  const outgoing = slide.querySelector('article');
-  if (outgoing && !lowerMotion.matches) {
-    const ghost = outgoing.cloneNode(true);
-    ghost.classList.add('outgoing');
-    ghost.inert = true;
-    ghost.setAttribute('aria-hidden','true');
-    stage.append(ghost);
-    const box = outgoing.getBoundingClientRect();
-    Object.assign(ghost.style,{left:box.left+'px',top:box.top+'px',width:box.width+'px'});
-    const turn = ghost.animate([{opacity:.9,transform:'perspective(800px) rotateY(0deg)'},{opacity:0,transform:'perspective(800px) rotateY('+(-direction*45)+'deg) translateX('+(-direction*65)+'px)'}],{duration:300,easing:'ease-in'});
-    turn.onfinish = () => ghost.remove();
-  }
   slide.innerHTML = '<article><div class="tag">'+tag+'</div><h1>'+title+'</h1>'+body+'</article>';
   if (!lowerMotion.matches) {
     const article = slide.firstElementChild;
