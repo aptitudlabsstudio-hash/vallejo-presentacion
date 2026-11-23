@@ -1,14 +1,40 @@
 <!doctype html>
 <html lang="es">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#151710"><meta name="description" content="Presentación interactiva sobre César Vallejo y Los heraldos negros."><title>Los heraldos negros · César Vallejo</title><link rel="stylesheet" href="./assets/style.css?v=4"><script defer src="./assets/content.js?v=4"></script><link rel="stylesheet" href="./assets/edition.css?v=4"><script defer src="./assets/app.js?v=4"></script></head>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#201916">
+<meta name="description" content="Una exposición interactiva sobre César Vallejo y Los heraldos negros.">
+<title>Los heraldos negros · César Vallejo</title>
+<link rel="stylesheet" href="./assets/motion.css?v=6">
+<script defer src="./assets/content.js?v=6"></script>
+<script defer src="./assets/book.js?v=6"></script>
+<script defer src="./assets/motion.js?v=6"></script>
+</head>
 <body>
-<main id="stage" aria-label="Presentación Los heraldos negros">
-<div id="gallery" aria-hidden="true"></div>
-<div class="grain"></div>
-<header><span>PUNO HABLA <i></i> RUTA LITERARIA</span><nav aria-label="Consulta"><button id="glossary">Glosario</button> <button id="index">Índice</button></nav></header>
-<section id="slide" aria-live="polite"></section>
-<footer><div class="track"><div id="progress"></div></div><div class="bar"><span id="position"></span><div class="actions"><button id="notes" title="Atajo N">Notas</button><button id="full" title="Atajo F">Pantalla completa</button><button id="prev" aria-label="Diapositiva anterior">←</button><button id="next" aria-label="Diapositiva siguiente">→</button></div></div></footer>
+<main id="journey" aria-label="Exposición sobre Los heraldos negros">
+  <div id="stage">
+    <div id="backdrop" aria-hidden="true"></div>
+    <div id="letterform" aria-hidden="true"></div>
+    <canvas id="book" aria-hidden="true"></canvas>
+    <img id="fallback" src="./assets/art/book.webp" alt="" hidden>
+    <header class="top">
+      <span class="brand">Puno habla <span>Ruta literaria</span></span>
+      <nav aria-label="Herramientas"><button id="glossary">Glosario</button><button id="index">Índice</button></nav>
+    </header>
+    <section id="slide" aria-label="Capítulo actual"></section>
+    <footer class="foot">
+      <div class="meter"><span id="position"></span><progress id="progress" max="11" value="0" aria-label="Progreso de la exposición"></progress></div>
+      <nav class="actions" aria-label="Controles de exposición">
+        <button id="notes" title="Atajo N">Notas</button><button id="full" title="Atajo F">Pantalla completa</button>
+        <button id="prev" aria-label="Capítulo anterior">←</button><button id="next" aria-label="Capítulo siguiente">→</button>
+      </nav>
+    </footer>
+  </div>
 </main>
-<dialog id="panel"><div class="panel-head"><h2 id="panelTitle"></h2><button id="close">Cerrar</button></div><div id="panelContent"></div></dialog>
+<dialog id="panel" aria-labelledby="panelTitle">
+  <div class="panel-head"><h2 id="panelTitle"></h2><button id="close">Cerrar</button></div>
+  <div id="panelContent"></div>
+</dialog>
 </body>
 </html>
