@@ -200,6 +200,11 @@ function showPanel(mode) {
       button.onclick=()=>{panel.close();navigate(i);};
       body.append(button);
     }
+    if (window.self===window.top){
+      const desktop=document.createElement('a');
+      desktop.className='source-link desktop-preview';desktop.href='./escritorio.html#'+(active+1);
+      desktop.textContent='Vista de computadora';body.append(desktop);
+    }
   } else {
     byId('panelTitle').textContent='Palabras del poema';
     const list=document.createElement('dl');
