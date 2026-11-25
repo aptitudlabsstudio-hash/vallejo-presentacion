@@ -3,28 +3,32 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#201916">
+<meta name="theme-color" content="#191c18">
 <meta name="description" content="Una exposición interactiva sobre César Vallejo y Los heraldos negros.">
 <title>Los heraldos negros · César Vallejo</title>
-<link rel="stylesheet" href="./assets/motion.css?v=6">
-<script defer src="./assets/content.js?v=6"></script>
-<script defer src="./assets/book.js?v=6"></script>
-<script defer src="./assets/motion.js?v=6"></script>
+<link rel="stylesheet" href="./assets/motion.css?v=grabados-1">
+<script defer src="./assets/content.js?v=grabados-1"></script>
+<script defer src="./assets/book.js?v=grabados-1"></script>
+<link rel="preload" href="./assets/edition/instrument.ttf" as="font" type="font/ttf" crossorigin>
+<link rel="stylesheet" href="./assets/galeria.css?v=grabados-1">
+<script defer src="./assets/galeria.js?v=grabados-1"></script>
+<script defer src="./assets/motion.js?v=grabados-1"></script>
 </head>
 <body>
 <main id="journey" aria-label="Exposición sobre Los heraldos negros">
   <div id="stage">
     <div id="backdrop" aria-hidden="true"></div>
+    <div id="fieldart" aria-hidden="true"></div>
     <div id="letterform" aria-hidden="true"></div>
     <canvas id="book" aria-hidden="true"></canvas>
-    <img id="fallback" src="./assets/art/book.webp" alt="" hidden>
+    <img id="fallback" src="./assets/edition/cubierta.webp" alt="" hidden>
     <header class="top">
-      <span class="brand">Puno habla <span>Ruta literaria</span></span>
+      <span class="brand"><i aria-hidden="true" class="brand-icon">P</i> Puno habla <span>Ruta literaria</span></span>
       <nav aria-label="Herramientas"><button id="glossary">Glosario</button><button id="index">Índice</button></nav>
     </header>
     <section id="slide" aria-label="Capítulo actual"></section>
     <footer class="foot">
-      <div class="meter"><span id="position"></span><progress id="progress" max="11" value="0" aria-label="Progreso de la exposición"></progress></div>
+      <div class="meter"><span id="position"></span><progress id="progress" max="11" value="0" aria-label="Progreso de la exposición"></progress><span id="sectionName"></span></div>
       <nav class="actions" aria-label="Controles de exposición">
         <button id="notes" title="Atajo N">Notas</button><button id="full" title="Atajo F">Pantalla completa</button>
         <button id="prev" aria-label="Capítulo anterior">←</button><button id="next" aria-label="Capítulo siguiente">→</button>

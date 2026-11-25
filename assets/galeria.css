@@ -1,0 +1,92 @@
+@font-face{font-family:Instrument;src:url('./edition/instrument.ttf') format('truetype');font-display:swap}
+@font-face{font-family:Instrument;src:url('./edition/instrument-italic.ttf') format('truetype');font-style:italic;font-display:swap}
+#stage{--ink:#29281f;--paper:#efe7d3;--accent:#76332c;--line:#51463455;--pad:clamp(1.1rem,5.5vw,6rem)}
+#stage[data-dark]{--ink:#f5ecd8;--accent:#e8b77e;--accent-ink:#30261f;--paper:#22261f;--line:#f0d8af50}
+#backdrop{background:radial-gradient(ellipse at 76% 43%,#eec89122,transparent 44%),radial-gradient(ellipse at 12% 95%,#19090419,transparent 53%),var(--field,#181d19)}
+#backdrop::after{background:linear-gradient(120deg,transparent,var(--field-accent) 55%,transparent);transform:skewX(-13deg);transform-origin:bottom}
+#backdrop::before{content:'';position:absolute;inset:0;background:url('./edition/grano.webp');opacity:.10;mix-blend-mode:soft-light}
+#fieldart{position:absolute;inset:0;z-index:-2;pointer-events:none;background-position:right center;background-repeat:no-repeat;background-size:auto 125%;opacity:.12;mix-blend-mode:multiply;mask-image:linear-gradient(90deg,transparent 40%,#000 100%)}
+#stage[data-dark] #fieldart{opacity:.13;mix-blend-mode:luminosity}
+#stage:is([data-page="2"],[data-page="4"],[data-page="8"]) #fieldart{background-position:left center;mask-image:linear-gradient(270deg,transparent 42%,#000 100%)}
+#book{filter:drop-shadow(1px 16px 10px #21130e4d) drop-shadow(6px 32px 28px #140b0733)}
+#letterform{font:italic clamp(11rem,28vw,31rem)/.8 Instrument,Georgia,serif;right:.04em;bottom:5.5vh;opacity:.065;letter-spacing:-.045em}
+.brand-icon{display:inline-grid;place-content:center;width:1.52rem;height:1.52rem;border:1px solid currentColor;border-radius:50%;font:italic 1.25rem/.9 Instrument,Georgia;color:var(--accent);margin-right:.25rem;vertical-align:middle}
+.top,.foot{margin:0;padding-block:.62rem}
+.top button,.actions button{border-radius:2rem;font-weight:500;padding:.64rem 1rem}
+.top button{border-color:transparent}
+.top button:hover,.top button:focus-visible{border-color:var(--line)}
+#next,#prev{width:2.55rem;padding-inline:0;font-size:1.12rem}
+#stage[data-page] h1{font-family:Instrument,Georgia,serif;letter-spacing:-.041em;font-weight:400;line-height:.93;text-wrap:balance}
+#stage[data-page] h1 em{font-weight:400}
+#stage[data-page="0"] h1{font-size:clamp(4.6rem,min(9.65vw,18.4vh),12rem);margin:.23em 0 .17em;letter-spacing:-.052em}
+#stage[data-page="0"] .author{font:italic clamp(1.65rem,2.8vw,3.1rem)/1.15 Instrument,Georgia,serif;margin:.25em 0}
+article .byline{letter-spacing:.12em;font-size:.66rem;margin-top:1rem}
+.tag{font:600 .7rem/1.35 system-ui,sans-serif;letter-spacing:.17em}
+.tag::before{width:1.85rem}
+#stage article>p:not(.byline,.author),article dd{line-height:1.42}
+#stage article>dl{line-height:1.36}
+#stage article>dl dt{font-size:.82em;line-height:1.8}
+article .accent{color:var(--accent);font-style:italic}
+blockquote{font-family:Instrument,Georgia,serif;font-size:clamp(1.65rem,2.8vw,3rem);line-height:1.13}
+.inspect,.scroll-hint{display:inline-flex;align-items:center;justify-content:center;gap:.6rem;min-height:2.5rem;margin:1rem .65rem 0 0;padding:.62rem 1.02rem;border:1px solid var(--line);border-radius:2rem;letter-spacing:.015em;font:600 .81rem/1.2 system-ui,sans-serif;text-transform:none}
+.inspect::after{content:'';width:.55em;height:.55em;border-top:1.5px solid currentColor;border-right:1.5px solid currentColor}
+.scroll-hint{background:var(--accent);color:var(--accent-ink);border-color:transparent}
+.scroll-hint:hover{background:var(--ink);color:var(--paper)}
+.meter{font-variant-numeric:tabular-nums;gap:.8rem}
+#sectionName{font-size:.7rem;letter-spacing:.07em;font-weight:500}
+progress{width:clamp(3rem,9vw,10rem);height:2px}
+.foot{padding-bottom:0}
+dialog{--paper:#242820;--ink:#f4ebd6;--accent:#f3c58c;--line:#c3ae8460;background:var(--paper);border:1px solid var(--line);border-radius:.8rem;box-shadow:0 2rem 8rem #06060388;padding:clamp(1rem,2vw,1.85rem);scrollbar-color:#a49373 #242820}
+dialog::backdrop{background:#141611cc}
+dialog .panel-head{border-bottom:1px solid var(--line);padding-bottom:.85rem}
+dialog .panel-head h2{font:400 clamp(1.65rem,3vw,2.45rem)/1.03 Instrument,Georgia,serif}
+dialog button{border-radius:1.5rem}
+dialog[data-mode="gallery"]{width:min(52rem,calc(100vw - 1.6rem));max-height:92dvh}
+.gallery-figure{margin:1rem auto 0;text-align:center}
+.plate{display:block;max-width:100%;height:auto;margin:0 auto}
+.gallery-figure>.plate{max-height:58dvh;width:auto;box-shadow:0 7px 18px #08090866}
+.caption{line-height:1.48;font-size:.92rem;color:#efe2c6;max-width:52ch;margin:.85rem auto;text-align:center}
+.source-link{display:block;text-align:center;font-size:.85rem;color:var(--accent)}
+.viewer-tools{display:flex;flex-wrap:wrap;gap:.5rem;justify-content:center;margin:.8rem 0}
+.viewer-tools button[aria-pressed=true]{background:var(--accent);color:#272518}
+.poem-page{padding:clamp(.85rem,3vw,2.4rem);background:#f4ecd9;color:#312a23;margin:.7rem auto 1rem;border-radius:.15rem}
+.poem-page p{margin:0 auto 1.15em;max-width:48ch;font:clamp(1rem,2.5vw,1.46rem)/1.38 Georgia,serif}
+.poem-page p:last-child{margin-bottom:0}
+.verse{display:block}
+.scans{display:flex;gap:.85rem;align-items:flex-start;justify-content:center}
+.scans img{width:calc(50% - .425rem)}
+.specimen canvas{display:block;width:100%;height:clamp(180px,50dvh,540px);cursor:grab;background:radial-gradient(ellipse,#4d4437 0%,#1b1e19 75%);border-radius:3px}
+.specimen canvas:active{cursor:grabbing}
+.specimen{margin-top:1rem}.specimen>.plate{max-height:48dvh}
+@media(max-width:700px),(max-aspect-ratio:1/1){
+  #stage{--pad:clamp(1.05rem,5vw,1.6rem);padding-top:max(.45rem,env(safe-area-inset-top));padding-bottom:max(.65rem,env(safe-area-inset-bottom))}
+  #stage[data-page="0"] h1{font-size:clamp(3.55rem,min(14vw,9vh),6rem);margin:.14em 0}
+  #stage[data-page="0"] .author{font-size:1.65rem}
+  #stage[data-page="0"] .byline{margin:.52rem 0}
+  .top,.foot{padding-block:.35rem}
+  .top button,.actions button{padding:.54rem .62rem}
+  #next,#prev{width:2rem}
+  .top nav,.actions{gap:.22rem}
+  #sectionName{display:none}
+  #fieldart,#stage:is([data-page="2"],[data-page="4"],[data-page="8"]) #fieldart{mask-image:linear-gradient(0deg,transparent 42%,#000 100%);background-size:100% auto;background-position:center top}
+  .inspect,.scroll-hint{margin:.5rem .35rem 0 0;min-height:2.15rem;padding:.45rem .75rem;font-size:.76rem}
+  .tag{font-size:.62rem}.brand-icon{width:1.32rem;height:1.32rem}
+  #stage[data-page] h1{margin:.22em 0}
+  article p,article dl{margin:.35em 0}
+  .scans{display:grid}.scans img{width:100%}
+  .poem-page{padding:.9rem .65rem}.verse{padding-left:.7rem;text-indent:-.7rem}
+}
+@media(max-height:520px) and (min-aspect-ratio:1/1){
+  #stage{padding-block:.4rem;gap:.16rem}
+  .top,.foot{padding-block:.2rem}.top button,.actions button{padding:.42rem .7rem}
+  article .inspect, .scroll-hint{min-height:1.9rem;margin:.4rem .25rem 0 0;padding:.3rem .6rem}
+}
+@media(prefers-reduced-motion:no-preference){
+  dialog[open]{animation:arrive .22s ease-out}
+  .top button,.actions button,.inspect,.scroll-hint{transition:background-color .2s,color .2s}
+  @keyframes arrive{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+}
+
+@media(min-width:701px) and (min-aspect-ratio:1/1) and (max-aspect-ratio:7/5){
+  #stage[data-page="0"] h1{font-size:clamp(4rem,9.2vw,8.6rem)}
+}

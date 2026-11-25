@@ -9,19 +9,19 @@ const last = slides.length-1;
 const clamp = (value,min=0,max=1) => Math.max(min,Math.min(value,max));
 const mix = (a,b,t) => a+(b-a)*t;
 const smooth = t => t*t*(3-2*t);
-const cream = [238,231,218], red = [100,35,39], black = [41,32,29];
+const cream = [239,231,211], red = [74,29,34], black = [24,29,25];
 const frames = [
-  [.755,.505,1.09,12,-30,-13,0,cream,68,32,.10,'1919'],
-  [.76,.52,1.05,-5,32,5,0,cream,63,37,.09,'1892'],
-  [.26,.52,1.04,14,-34,8,0,red,0,42,.18,'PARÍS'],
-  [.72,.53,.94,36,0,-5,.82,cream,61,39,.12,'69'],
-  [.27,.51,.82,23,11,9,1,cream,0,47,.09,'MIGUEL'],
-  [.73,.52,.89,29,-9,-6,1,black,56,44,.24,'VOZ'],
+  [.738,.48,1.14,11,-24,-10,0,black,65,35,.12,''],
+  [.75,.50,.90,15,-11,-6,.99,cream,63,37,.09,''],
+  [.265,.50,.91,21,16,6,1,red,0,42,.18,''],
+  [.72,.53,.94,36,0,-5,.82,cream,61,39,.12,''],
+  [.27,.51,.82,23,11,9,1,cream,0,47,.09,''],
+  [.73,.52,.89,29,-9,-6,1,black,56,44,.24,''],
   [.74,.50,.91,18,-12,-11,1,cream,64,36,.16,'I'],
   [.74,.52,.86,37,3,12,1,red,58,42,.18,'II'],
   [.26,.52,.87,15,6,-7,1,black,0,48,.19,'III'],
   [.73,.53,.88,23,1,-10,1,cream,58,42,.13,'IV'],
-  [.72,.51,1.09,12,25,9,0,red,64,36,.14,'DUDA'],
+  [.72,.51,1.09,12,25,9,0,red,64,36,.14,''],
   [.77,.52,.72,5,-18,-9,0,cream,64,36,.14,'']
 ];
 const glossary = [
@@ -40,12 +40,20 @@ const entries = slides.map(({tag,title,body},index)=>{
   const chapter = document.createElement('article');
   chapter.hidden=true;
   chapter.innerHTML='<div class="tag">'+tag+'</div><h1>'+title+'</h1>'+body+'</article>';
+  const artifact=galleryEntries[index];
+  if(artifact){
+    const view=document.createElement('button');
+    view.className='inspect';
+    view.textContent=artifact.button;
+    view.onclick=()=>showPanel('gallery');
+    chapter.append(view);
+  }
   if(index===0) {
     const hint=document.createElement('button');
     hint.className='scroll-hint';
-    hint.innerHTML='Baja para explorar <span aria-hidden="true">↓</span>';
+    hint.innerHTML='Comenzar recorrido <span aria-hidden="true">↓</span>';
     hint.onclick=()=>navigate(1);
-    chapter.append(hint);
+    chapter.insertBefore(hint,chapter.querySelector('.inspect'));
   }
   slide.append(chapter);
   return chapter;
@@ -75,6 +83,9 @@ function select(index) {
   const entry=entries[active];
   entry.hidden=false;
   stage.dataset.page=active;
+  byId('sectionName').textContent=['Portada','El autor','El autor','El poemario','El poemario','Lectura','Análisis','Análisis','Análisis','Análisis','Cierre','Fuentes'][active];
+  const image=backImages[active];
+  byId('fieldart').style.backgroundImage=image?'url("./assets/edition/'+image+'.webp")':'none';
   stage.toggleAttribute('data-dark',frames[active][7]!==cream);
   byId('letterform').textContent=frames[active][11];
   byId('position').textContent=String(active+1).padStart(2,'0')+' / '+slides.length;
@@ -82,13 +93,17 @@ function select(index) {
   byId('next').disabled=active===last;
   history.replaceState(null,'','#'+(active+1));
 }
-function draw(){
+let introStart, lastDraw;
+function draw(now=performance.now()){
+  if(introStart===undefined)introStart=now;
+  const elapsed=lastDraw===undefined?16:Math.max(1,now-lastDraw);
+  lastDraw=now;
   frame=undefined;
   const target=clamp(window.scrollY/step,0,last);
   const gap=target-cameraPosition;
   if(reduced.matches || !Number.isFinite(gap) || Math.abs(gap)>1.6 || Math.abs(gap)<.003) cameraPosition=target;
   else {
-    cameraPosition+=gap*.27;
+    cameraPosition+=gap*(1-Math.exp(-elapsed/68));
     requestDraw();
   }
   let position=cameraPosition;
@@ -105,11 +120,11 @@ function draw(){
   const pose=a.slice(0,7).map((value,i)=>mix(value,b[i],moving));
   const narrow=stage.clientWidth<=700 || stage.clientWidth<=stage.clientHeight;
   if(narrow) {
-    pose[0]=.50 + (pose[0]-.50)*.23;
-    pose[1]=.318;
-    pose[2]*=pose[6]>.4?.71:.76;
+    pose[0]=.50 + (pose[0]-.50)*.09;
+    pose[1]=.30;
+    pose[2]*=pose[6]>.4?.74:.70;
   } else if (pose[6]>.4) {
-    pose[2]*=.90;
+    pose[2]*=Math.min(.96,(stage.clientWidth/stage.clientHeight)*.56);
   }
   if (!reduced.matches) {
     pose[1]-=arc*(narrow?.045:.10);
@@ -117,8 +132,13 @@ function draw(){
     pose[3]+=18*arc;
     pose[4]+=(index%2===0?-34:34)*arc;
   }
+  const arrival=clamp((now-introStart)/1150);
+  if(!reduced.matches && position===0 && arrival<1){
+    const left=(1-arrival)**3;
+    pose[4]-=32*left;pose[5]+=6*left;pose[2]*=1-.10*left;requestDraw();
+  }
   const rgb=a[7].map((v,i)=>Math.round(mix(v,b[7][i],moving)));
-  const band=a[7]===cream?[142,45,48]:a[7]===red?[59,23,28]:[101,43,37];
+  const band=a[7]===cream?[172,133,93]:a[7]===red?[144,65,60]:[135,111,70];
   stage.style.setProperty('--field','rgb('+rgb.join(',')+')');
   stage.style.setProperty('--field-accent','rgb('+band.join(',')+')');
   stage.style.setProperty('--field-x',mix(a[8],b[8],moving)+'%');
@@ -131,8 +151,13 @@ function draw(){
   entries[current].style.translate=(offset*-50)+'px 0';
   // Keep headings legible if a viewer pauses partway through a transition.
   byId('progress').value=position;
-  if(book) book.render(pose,current,index>=3&&index<9?moving:0);
-  else byId('fallback').style.transform='rotate('+pose[5]+'deg) scale('+(pose[2]*.88+.18)+')';
+  if(book) book.render(pose,current,index>=1&&index<9&&part>.1&&part<.9?moving:0);
+  else {
+    const fallback=byId('fallback');
+    const src='./assets/edition/'+(backImages[current]||'cubierta')+'.webp';
+    if(fallback.getAttribute('src')!==src)fallback.src=src;
+    fallback.style.transform='rotate('+pose[5]*.5+'deg)';
+  }
 }
 function resize(){
   const old=step;
@@ -154,7 +179,10 @@ function move(direction) {
 function showPanel(mode) {
   const body=byId('panelContent');
   body.replaceChildren();
-  if(mode==='notes'){
+  panel.dataset.mode=mode;
+  if(mode==='gallery'){
+    openGallery(active,body,byId('panelTitle'));
+  } else if(mode==='notes'){
     byId('panelTitle').textContent='Notas de exposición';
     const time=document.createElement('p');
     time.textContent='Tiempo previsto · '+slides[active].time;
@@ -185,6 +213,7 @@ function showPanel(mode) {
     body.append(list);
   }
   panel.showModal();
+  panel.scrollTop=0;
 }
 async function fullscreen(){
   try{

@@ -33,18 +33,20 @@ function makeBook(canvas, redraw) {
       vec3 norm=normalize(n);
       vec3 key=normalize(vec3(-.39,.71,.78));
       vec3 eye=normalize(vec3(0.,0.,8.)-world);
-      float speckle=fract(sin(dot(tex,vec2(127.1,311.7)))*43758.5453);
+      
       vec3 color=base;
       if(material>1.5) color=texture2D(surface,tex).rgb;
       if(material>.5 && material<1.5){
         float leaf = sin(tex.y*289. + sin(pageX*26.)*.72);
         color*=.92+.085*smoothstep(-.6,.8,leaf);
       }
-      color*=.94+speckle*.075;
+      
       float diffuse=max(dot(norm,key),0.);
       float rim=pow(1.-max(0.,dot(norm,eye)),2.);
       float shine=pow(max(0.,dot(norm,normalize(key+eye))),20.);
-      gl_FragColor=vec4(color*(.63+.44*diffuse)+vec3(.95,.68,.49)*(.036*rim+.09*shine),1.);
+      float foil = material > 2.5 ? smoothstep(.13,.58,color.r-color.b) : 0.;
+      float glint = pow(max(0.,dot(norm,normalize(vec3(.45,.1,1.)+eye))),8.);
+      gl_FragColor=vec4(color*(.73+.32*diffuse)+vec3(.99,.78,.46)*(.022*rim+.036*shine+foil*glint*.28),1.);
     }`;
   function compile(type, source) {
     const shader=gl.createShader(type);
@@ -112,9 +114,10 @@ function makeBook(canvas, redraw) {
     const u=i/24, v=(i+1)/24;
     return face([0,0,1],[[u-.5,-.5,0],[v-.5,-.5,0],[v-.5,.5,0],[u-.5,.5,0]],[[u,0],[v,0],[v,1],[u,1]]);
   }));
-  const leather=[.305,.061,.073], margin=[.69,.54,.37];
+  const leather=[.247,.084,.094], margin=[.80,.67,.47];
   const textured=[1,1,1];
   const ink='#482620';
+  const anisotropy=gl && gl.getExtension('EXT_texture_filter_anisotropic');
   function texture(w,h, painter) {
     const c=document.createElement('canvas');
     c.width=w;
@@ -130,6 +133,7 @@ function makeBook(canvas, redraw) {
       gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);
       gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR_MIPMAP_LINEAR);
       gl.generateMipmap(gl.TEXTURE_2D);
+      if(anisotropy) gl.texParameterf(gl.TEXTURE_2D,anisotropy.TEXTURE_MAX_ANISOTROPY_EXT,Math.min(6,gl.getParameter(anisotropy.MAX_TEXTURE_MAX_ANISOTROPY_EXT)));
     };
     update();
     return {tex,update};
@@ -140,30 +144,17 @@ function makeBook(canvas, redraw) {
     ctx.fillText(text,x,y);
   }
   const gold='#dbb480';
-  const cover=texture(512,1024,(ctx,w,h)=>{
-    const grad=ctx.createLinearGradient(0,0,w,h);
-    grad.addColorStop(0,'#3e131b');grad.addColorStop(.55,'#69242c');grad.addColorStop(1,'#43191e');
-    ctx.fillStyle=grad;
-    ctx.fillRect(0,0,w,h);
-    ctx.strokeStyle=gold;
-    ctx.lineWidth=2;
-    ctx.strokeRect(38,40,w-76,h-80);
-    ctx.lineWidth=1;
-    ctx.strokeRect(48,50,w-96,h-100);
-    ctx.textAlign='center';
-    line(ctx,256,207,'CÉSAR VALLEJO',26,'Georgia',gold);
-    line(ctx,256,379,'LOS',39,'Georgia',gold);
-    line(ctx,256,464,'HERALDOS',63,'Georgia',gold);
-    line(ctx,256,544,'NEGROS',68,'Georgia',gold);
-    ctx.save();
-    ctx.translate(256,706);
-    for(let i=0;i<4;i++){
-      ctx.rotate(Math.PI/4);
-      ctx.strokeRect(-25,-25,50,50);
-    }
-    ctx.restore();
-    line(ctx,256,881,'LIMA',25,'Georgia',gold);
-  }).tex;
+  let coverArt;
+  const cover=texture(1024,1024,(ctx,w,h)=>{
+    ctx.fillStyle='#491f25';ctx.fillRect(0,0,w,h);
+    if(coverArt){ctx.drawImage(coverArt,0,0,w,h);return;}
+    ctx.strokeStyle=gold; ctx.lineWidth=3;ctx.strokeRect(55,35,w-90,h-70);
+    ctx.textAlign='center';line(ctx,w/2,300,'César Vallejo',65,'Georgia',gold);
+    line(ctx,w/2,500,'Los heraldos',90,'Georgia',gold);line(ctx,w/2,610,'negros',112,'Georgia',gold);
+  });
+  const jacket=new Image();
+  jacket.onload=()=>{coverArt=jacket;cover.update();redraw();};
+  jacket.src='./assets/edition/cubierta.webp';
   const spine=texture(128,1024,(ctx,w,h)=>{
     ctx.fillStyle='#591820';ctx.fillRect(0,0,w,h);ctx.strokeStyle=gold;ctx.lineWidth=2;
     for(const y of [95,114,910,929]) {ctx.beginPath();ctx.moveTo(12,y);ctx.lineTo(116,y);ctx.stroke();}
@@ -171,53 +162,70 @@ function makeBook(canvas, redraw) {
     line(ctx,0,0,'VALLEJO   /   LOS HERALDOS NEGROS',27,'Georgia',gold);
     ctx.restore();
   }).tex;
-  const spread=[
-    ['El autor','Santiago de Chuco','1892','Trujillo','1915'],
-    ['El autor','Lima y París','Lima, 1919','Trilce, 1922','París, 1938'],
-    ['El poemario','Los heraldos','negros','1918 en portada','En circulación en 1919'],
-    ['El poemario','A mi hermano','Miguel','La familia y la ausencia'],
-    ['El poema','Hay golpes en la vida,','tan fuertes…','¡Yo no sé!'],
-    ['Primera estrofa','El dolor se acumula','Resaca','Agua empozada'],
-    ['Segunda estrofa','El dolor deja huellas','Zanjas','Heraldos'],
-    ['Tercera estrofa','Una esperanza','se quema','Crepitaciones'],
-    ['Cuarta estrofa','La mirada y la duda','Un charco de culpa'],
-    ['Conclusión','«Yo no sé»','El verso vuelve al inicio'],
-  ];
-  function paper(ctx,w,h) {
-    const grad=ctx.createLinearGradient(0,0,w,0);
-    grad.addColorStop(0,'#c3a881');grad.addColorStop(.14,'#f3e0b7');grad.addColorStop(.94,'#f5e6c4');grad.addColorStop(1,'#dac095');
-    ctx.fillStyle=grad;ctx.fillRect(0,0,w,h);
-  }
-  const leftPaper=texture(512,1024,(ctx,w,h)=>{
-    ctx.save();ctx.translate(w,0);ctx.scale(-1,1);paper(ctx,w,h);ctx.restore();
-    ctx.strokeStyle='#8c4e3f';ctx.strokeRect(48,62,416,900);
+  const backCover=texture(512,512,(ctx,w,h)=>{
+    ctx.fillStyle='#481d22';ctx.fillRect(0,0,w,h);
+    ctx.strokeStyle='#b68e5e';ctx.lineWidth=2;ctx.strokeRect(22,18,w-44,h-36);
+    ctx.lineWidth=1;ctx.strokeRect(28,24,w-56,h-48);
     ctx.textAlign='center';
-    line(ctx,256,325,'César Vallejo',40);
-    line(ctx,256,465,'Los heraldos',48);
-    line(ctx,256,525,'negros',48);
-    line(ctx,256,813,'Lima',37);
+    ctx.save();ctx.translate(256,250);ctx.scale(1,.78);
+    ctx.beginPath();ctx.arc(0,0,57,0,2*Math.PI);ctx.stroke();
+    line(ctx,0,17,'CV',46,'Georgia','#d8af79');ctx.restore();
+    line(ctx,256,446,'L I M A',16,'Georgia','#c7a278');
   }).tex;
-  const sheets=spread.map(([label,...lines],i)=>{
-    let art;
-    const page=texture(512,1024,(ctx,w,h)=>{
-      paper(ctx,w,h);
-      ctx.textAlign='left';
-      line(ctx,58,124,label.toUpperCase(),23,'system-ui','#81383b');
-      ctx.fillStyle='#9c6559';ctx.fillRect(58,152,396,2);
-      lines.forEach((text,j)=>line(ctx,58,236+j*53,text,j<2?36:29));
-      if(art) {
-        ctx.drawImage(art,58,488,396,345);
-        ctx.strokeStyle='#9c6559';ctx.strokeRect(58,488,396,345);
+  const leaves=[
+    ['vallejo','El autor','César','Vallejo','Santiago de Chuco','1892'],
+    ['vallejo','El autor','De Lima','a París','Una vida entre dos continentes','1929'],
+    ['portada','El poemario','Los heraldos','negros','La primera edición','1918 / 1919'],
+    ['mirada','Canciones de hogar','A mi hermano','Miguel','La familia y la ausencia',''],
+    ['poema-1','Lectura','Hay golpes','en la vida…','Los heraldos negros',''],
+    ['resaca','Primera estrofa','La resaca','del dolor','El agua que se acumula','I'],
+    ['zanjas','Segunda estrofa','Zanjas','oscuras','El golpe que deja huella','II'],
+    ['horno','Tercera estrofa','El pan','en el horno','Una esperanza perdida','III'],
+    ['mirada','Cuarta estrofa','Vuelve','los ojos','La mirada y la duda','IV'],
+    ['resaca','Verso final','Yo','no sé…','Regreso al primer verso','']
+  ];
+  let leafIndex=0;
+  const pictures=new Map();
+  function picture(name){
+    if(pictures.has(name)) return pictures.get(name);
+    const img=new Image();pictures.set(name,null);
+    img.onload=()=>{pictures.set(name,img);if(leaves[leafIndex][0]===name){left.update();redraw();}};
+    img.src='./assets/edition/'+name+'.webp';
+    return null;
+  }
+  function leafSurface(leftSide){
+    return texture(512,1024,(ctx,w,h)=>{
+      const [name,section,one,two,note,numeral]=leaves[leafIndex];
+      ctx.save();ctx.scale(w/600,h/800);
+      const grad=ctx.createLinearGradient(0,0,600,0);
+      const stops=leftSide?[[0,'#ecdec2'],[.85,'#f7edda'],[1,'#bba98c']]:[[0,'#bba78a'],[.13,'#f5ebd9'],[1,'#f4e7cd']];
+      for(const [x,c] of stops) grad.addColorStop(x,c);
+      ctx.fillStyle=grad;ctx.fillRect(0,0,600,800);
+      ctx.strokeStyle='#9a7a59';ctx.lineWidth=1.5;ctx.strokeRect(31,31,538,738);
+      ctx.textAlign='center';
+      if(leftSide){
+        const art=picture(name);
+        const documentary=name==='portada'||name==='poema-1';
+        const bw=468,bh=560;
+        if(art){
+          const factor=(documentary?Math.min:Math.max)(bw/art.width,bh/art.height);
+          ctx.save();ctx.beginPath();ctx.rect(66,92,bw,bh);ctx.clip();
+          ctx.drawImage(art,300-art.width*factor/2,372-art.height*factor/2,art.width*factor,art.height*factor);ctx.restore();
+        }
+        const cap=name==='vallejo'?'Versalles, 1929':documentary?'Facsímil de la primera edición':section;
+        line(ctx,300,703,cap,27,'Georgia','#5e3c30');
+      }else{
+        line(ctx,300,119,section.toUpperCase(),21,'system-ui','#803a30');
+        line(ctx,300,344,one,68,'Georgia','#382a25');
+        line(ctx,300,425,two,67,'Georgia','#792f2a');
+        ctx.fillStyle='#a37e53';ctx.fillRect(250,480,100,2);
+        line(ctx,300,548,note,25,'Georgia','#56463b');
+        if(numeral)line(ctx,300,680,numeral,32,'Georgia','#794438');
       }
+      ctx.restore();
     });
-    const imageName={0:'mountain',5:'water',6:'crack',7:'ember',8:'water'}[i];
-    if(imageName) {
-      const image=new Image();
-      image.onload=()=>{art=image;page.update();redraw();};
-      image.src='./assets/art/'+imageName+'.webp';
-    }
-    return page.tex;
-  });
+  }
+  const left=leafSurface(true), right=leafSurface(false);
   const queue=[];
   function transform(matrix,[x,y,z],w=1) {
     return [matrix[0]*x+matrix[4]*y+matrix[8]*z+matrix[12]*w,
@@ -260,7 +268,11 @@ function makeBook(canvas, redraw) {
     polygon(ctx,bleed);
     ctx.clip();
     ctx.transform(a,b,c,d,x0-a*u0-c*v0,y0-b*u0-d*v0);
-    ctx.drawImage(img,0,0);
+    const sx=Math.max(0,Math.floor(Math.min(u0,u1,u2))-2);
+    const sy=Math.max(0,Math.floor(Math.min(v0,v1,v2))-2);
+    const sw=Math.min(img.width,Math.ceil(Math.max(u0,u1,u2))+2)-sx;
+    const sh=Math.min(img.height,Math.ceil(Math.max(v0,v1,v2))+2)-sy;
+    if(sw>0 && sh>0)ctx.drawImage(img,sx,sy,sw,sh,sx,sy,sw,sh);
     ctx.restore();
   }
   function renderSoftware(w,h,f) {
@@ -288,8 +300,8 @@ function makeBook(canvas, redraw) {
         }
         continue;
       }
-      const strips=Math.abs(uv[1][0]-uv[0][0])<.1?1:4;
-      const rows=strips===1?1:5;
+      const strips=Math.abs(uv[1][0]-uv[0][0])<.1?1:3;
+      const rows=strips===1?1:3;
       for(let j=0;j<rows;j++) for(let i=0;i<strips;i++){
         const corners=[[i/strips,j/rows],[(i+1)/strips,j/rows],[(i+1)/strips,(j+1)/rows],[i/strips,(j+1)/rows]];
         const screen=corners.map(([u,v])=>project(sample(verts,u,v)));
@@ -319,9 +331,11 @@ function makeBook(canvas, redraw) {
   }
   return {
     render(pose, chapter, turn){
+      const wanted=Math.max(0,Math.min(leaves.length-1,chapter-1));
+      if(wanted!==leafIndex){leafIndex=wanted;left.update();right.update();}
       const width=canvas.clientWidth,height=canvas.clientHeight;
       if(!width||!height) return;
-      const resolution=Math.min(devicePixelRatio,1.65,1700/width);
+      const resolution=Math.min(devicePixelRatio,2,2400/width);
       const w=Math.max(1,Math.round(width*resolution)), h=Math.max(1,Math.round(height*resolution));
       if(canvas.width!==w||canvas.height!==h) {canvas.width=w;canvas.height=h;}
       const aspect=width/height,f=3.55,distance=8;
@@ -340,14 +354,17 @@ function makeBook(canvas, redraw) {
       const box=(root,mesh,x,y,z,w,h,d,color,mode=0,img=null)=>draw(mesh,combine(root,translate(x,y,z),scale(w,h,d)),color,mode,img);
       const front=combine(world,translate(-.88,0,.177),rotate('y',-opening*(Math.PI-.08)));
       box(world,block,0,0,-.22,1.92,2.52,.105,leather);
+      box(world,faceMesh[1],0,0,-.276,1.91,2.51,.008,textured,3,backCover);
       box(world,block,0,0,-.008,1.78,2.34,.33,margin);
       box(world,edges,0,0,-.008,1.781,2.341,.331,margin,1);
       box(world,block,-.9,0,-.003,.12,2.52,.49,leather);
       box(world,faceMesh[2],-.962,0,-.003,.01,2.49,.485,textured,2,spine);
+      // A woven marker projects below the text block, between the leaves.
+      box(world,block,.48,-1.16,-.06,.12,.34,.014,[.49,.16,.15]);
       box(front,block,.88,0,.052,1.92,2.52,.105,leather);
-      box(front,faceMesh[0],.88,0,.11,1.91,2.51,.008,textured,2,cover);
-      box(front,faceMesh[1],.87,0,-.011,1.73,2.32,.012,textured,2,leftPaper);
-      const page=sheets[Math.max(0,Math.min(sheets.length-1,chapter-1))];
+      box(front,faceMesh[0],.88,0,.11,1.91,2.51,.008,textured,3,cover.tex);
+      box(front,faceMesh[1],.87,0,-.011,1.73,2.32,.012,textured,2,left.tex);
+      const page=right.tex;
       box(world,faceMesh[0],.015,0,.161,1.74,2.32,.014,textured,2,page);
       if(turn > 0 && opening>.68) {
         const leaf=combine(world,translate(-.85,0,.174),rotate('y',-turn*(Math.PI-.08)),translate(.865,0,0),scale(1.73,2.325,1));
