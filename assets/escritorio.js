@@ -25,4 +25,4 @@ function connect(){
 }
 frame.addEventListener('load',connect);
 const start=Number(location.hash.slice(1));
-frame.src='./?edicion=analisis-4#'+(Number.isInteger(start)&&start>=1&&start<=12?start:1);
+frame.src='./?edicion=puntos-5#'+(Number.isInteger(start)&&start>=1&&start<=12?start:1);
