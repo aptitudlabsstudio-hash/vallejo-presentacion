@@ -147,3 +147,27 @@ dialog[data-mode="gallery"]{width:min(52rem,calc(100vw - 1.6rem));max-height:92d
 .guide-extra { margin-top: 1.35rem; border-top: 1px solid var(--line); }
 .guide-extra summary { width: fit-content; padding: .85rem .25rem; color: var(--accent); cursor: pointer; }
 .guide-extra p { margin: 0 0 .35rem; }
+
+/* Keep the projected text readable alongside the book illustration. */
+#slide article p:not(.author, .byline), #slide .life-events, #slide .sources {
+  font-size: clamp(1.02rem, min(1.52vw, 2.9vh), 1.45rem);
+}
+#slide article p + p { margin-top: .65em; }
+#slide p strong { color: var(--accent); }
+#slide .verse-sample {
+  font-size: clamp(1.45rem, min(2.22vw, 4.8vh), 2.2rem);
+  line-height: 1.14;
+  margin: .5em 0 .6em;
+}
+#slide .section-names { padding-inline-start: .75em; border-inline-start: 2px solid var(--accent); }
+#slide .life-events { gap: .5em .85em; }
+#slide .credit { font-style: italic; }
+@media (min-width: 701px) and (min-aspect-ratio: 1/1) {
+  #stage[data-page] h1 { font-size: clamp(2.65rem, min(5vw, 9.5vh), 6.3rem); }
+  #stage[data-page="0"] h1 { font-size: clamp(3.6rem, min(7.8vw, 14.4vh), 9rem); }
+}
+@media (max-width: 700px), (max-aspect-ratio: 1/1) {
+  #slide article p:not(.author, .byline), #slide .life-events, #slide .sources {
+    font-size: clamp(.98rem, 3.8vw, 1.15rem);
+  }
+}
