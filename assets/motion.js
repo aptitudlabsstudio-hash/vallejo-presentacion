@@ -83,6 +83,7 @@ function select(index) {
   const entry=entries[active];
   entry.hidden=false;
   stage.dataset.page=active;
+  byId('cueText').innerHTML=slides[active].cue;
   byId('sectionName').textContent=['Portada','El autor','El autor','El poemario','El poemario','Lectura','Análisis','Análisis','Análisis','Análisis','Cierre','Fuentes'][active];
   const image=backImages[active];
   byId('fieldart').style.backgroundImage=image?'url("./assets/edition/'+image+'.webp")':'none';
@@ -183,12 +184,19 @@ function showPanel(mode) {
   if(mode==='gallery'){
     openGallery(active,body,byId('panelTitle'));
   } else if(mode==='notes'){
-    byId('panelTitle').textContent='Notas de exposición';
-    const time=document.createElement('p');
-    time.textContent='Tiempo previsto · '+slides[active].time;
-    const text=document.createElement('p');
-    text.textContent=slides[active].notes;
-    body.append(time,text);
+    const chapter=slides[active];
+    byId('panelTitle').textContent='Guion para exponer';
+    const position=element('p','guide-meta','Diapositiva '+(active+1)+' de '+slides.length+' · '+chapter.time);
+    const heading=entries[active].querySelector('h1').cloneNode(true);
+    for(const lineBreak of heading.querySelectorAll('br')) lineBreak.replaceWith(' ');
+    const title=element('h3','guide-title',heading.textContent);
+    const script=element('p','guide-script',chapter.notes);
+    const nextLabel=active===last?'Para responder':active===last-1?'Para cerrar':'Para continuar';
+    const bridge=element('div','guide-bridge');
+    bridge.append(element('h4','cue-label',nextLabel),element('p','',chapter.bridge));
+    const extra=element('details','guide-extra');
+    extra.append(element('summary','','Apuntes de ensayo'),element('p','',chapter.rehearsal));
+    body.append(position,title,script,bridge,extra);
   } else if(mode==='index') {
     byId('panelTitle').textContent='Índice';
     for(const [i,chapter] of entries.entries()){

@@ -7,12 +7,12 @@
 <meta name="description" content="Una exposición interactiva sobre César Vallejo y Los heraldos negros.">
 <title>Los heraldos negros · César Vallejo</title>
 <link rel="stylesheet" href="./assets/motion.css?v=grabados-1">
-<script defer src="./assets/content.js?v=grabados-1"></script>
+<script defer src="./assets/content.js?v=guion-1"></script>
 <script defer src="./assets/book.js?v=grabados-1"></script>
 <link rel="preload" href="./assets/edition/instrument.ttf" as="font" type="font/ttf" crossorigin>
-<link rel="stylesheet" href="./assets/galeria.css?v=grabados-1">
+<link rel="stylesheet" href="./assets/galeria.css?v=guion-1">
 <script defer src="./assets/galeria.js?v=grabados-1"></script>
-<script defer src="./assets/motion.js?v=grabados-2"></script>
+<script defer src="./assets/motion.js?v=guion-1"></script>
 </head>
 <body>
 <main id="journey" aria-label="Exposición sobre Los heraldos negros">
@@ -27,10 +27,14 @@
       <nav aria-label="Herramientas"><button id="glossary">Glosario</button><button id="index">Índice</button></nav>
     </header>
     <section id="slide" aria-label="Capítulo actual"></section>
+    <aside id="speakerCue" aria-label="Frase para exponer">
+      <span class="cue-label">Idea clave</span>
+      <p id="cueText"></p>
+    </aside>
     <footer class="foot">
       <div class="meter"><span id="position"></span><progress id="progress" max="11" value="0" aria-label="Progreso de la exposición"></progress><span id="sectionName"></span></div>
       <nav class="actions" aria-label="Controles de exposición">
-        <button id="notes" title="Atajo N">Notas</button><button id="full" title="Atajo F">Pantalla completa</button>
+        <button id="notes" aria-haspopup="dialog" title="Abrir el guion de esta diapositiva (N)">Guion</button><button id="full" title="Atajo F">Pantalla completa</button>
         <button id="prev" aria-label="Capítulo anterior">←</button><button id="next" aria-label="Capítulo siguiente">→</button>
       </nav>
     </footer>
